@@ -1,0 +1,31 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS base
+
+# set dir in the container
+WORKDIR /app
+
+# cache cs proj
+COPY *.csproj ./
+
+# fetch dependencies
+RUN dotnet restore
+
+# copy the app (.dockerignore files ignored)
+COPY . .
+
+
+FROM base as dev
+# start the app in watch mode
+ENTRYPOINT ["dotnet", "watch"]
+
+
+# container for migrations
+FROM base as migrations
+
+# maybe: copy all?
+
+# install dotnet ef tools
+RUN dotnet tool install --global dotnet-ef --version 8.0.1
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# no enttrypoint - runs interactive shell
+ENTRYPOINT ["sh"]

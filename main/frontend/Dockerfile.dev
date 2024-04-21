@@ -1,0 +1,22 @@
+FROM node:alpine3.18
+
+# specify workdir inside container
+# paths on host: relative to Dockerfile 
+# paths in container: relative to WORKDIR
+WORKDIR /app
+
+# cache dependencies 
+# only runs npm install if dependencies change thanks to caching
+COPY package.json .
+
+# install dependencies
+RUN npm install 
+
+# copy app 
+COPY . .
+
+# expose port
+EXPOSE 8080
+
+# start the dev server
+CMD ["npm", "run", "dev"]

@@ -1,0 +1,59 @@
+services:
+  main-frontend:
+    container_name: dev-main-frontend
+    build:
+      context: ./main/frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - type: bind
+        source: ./main/frontend/src
+        target: /app/src
+      # anonymous volume: do not include node_modules in bind mount
+      - /app/node_modules
+    ports:
+      - "8080:8080"
+  main-backend: &backend-config
+    container_name: dev-main-backend
+    build: &backend-build
+      context: ./main/backend/API
+      dockerfile: Dockerfile.dev
+      target: dev
+    ports:
+      - "5001:5001"
+    volumes:
+      - type: bind
+        source: ./main/backend/API
+        target: /app
+        # 2 anonymous volumes, so that they are not included in bind mount
+      - /app/bin
+      - /app/obj
+    env_file:
+      - ./secrets/backend.dev.env
+    depends_on:
+      - main-database
+  # interactive container to create and run migrations
+  main-backend-migrations:
+    <<: *backend-config
+    # different container name required
+    container_name: dev-migrations
+    # different target from the dockerfile
+    build:
+      <<: *backend-build
+      target: migrations
+    # interactive container
+    stdin_open: true
+    tty: true
+    # profile so that this service does not run if not directly specified
+    profiles:
+      - database-migration
+  main-database:
+    container_name: dev-main-database
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - 1433:1433
+    env_file:
+      - ./secrets/database.dev.env
+    volumes:
+      - dev-db-data:/var/opt/mssql
+volumes:
+  dev-db-data:
