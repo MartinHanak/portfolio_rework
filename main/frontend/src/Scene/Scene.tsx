@@ -1,6 +1,7 @@
 import { MeshProps, useFrame } from '@react-three/fiber';
 import React, { useRef, useState } from 'react';
 import { Mesh } from 'three';
+import Test from './Test';
 
 function Box(props: MeshProps) {
     // This reference will give us direct access to the mesh
@@ -36,5 +37,6 @@ export default function Scene() {
         <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
         <Box position={[-1.2, 0, 0]} />
         <Box position={[1.2, 0, 0]} />
+        <Test />
     </>;
 }
