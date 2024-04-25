@@ -2,6 +2,7 @@ import { MeshProps, useFrame } from '@react-three/fiber';
 import React, { useRef, useState } from 'react';
 import { Mesh } from 'three';
 import Test from './Test';
+import WireTest from './WireTest';
 
 function Box(props: MeshProps) {
     // This reference will give us direct access to the mesh
@@ -38,5 +39,7 @@ export default function Scene() {
         <Box position={[-1.2, 0, 0]} />
         <Box position={[1.2, 0, 0]} />
         <Test />
+
+        <WireTest />
     </>;
 }
