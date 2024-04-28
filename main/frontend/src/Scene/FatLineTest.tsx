@@ -1,60 +1,51 @@
-import { useEffect, useRef } from "react";
-import { GeometryUtils, Line2, LineGeometry, LineMaterial } from "three/examples/jsm/Addons.js";
-import * as THREE from 'three';
-import { GroupProps, ThreeElements } from "@react-three/fiber";
+import { useEffect, useLayoutEffect, useMemo } from "react";
+import { LineMaterial, LineSegments2, LineSegmentsGeometry } from "three/examples/jsm/Addons.js";
+import ModifiedLineFragment from '../shaders/ModifiedLineFragment.glsl';
 
 export default function FatLineTest() {
-    const groupRef = useRef<any>();
-    useEffect(() => {
-        // Position and THREE.Color Data
-
-        const positions = [];
-        const colors = [];
-
-        const points = GeometryUtils.hilbert3D(new THREE.Vector3(0, 0, 0), 20.0, 1, 0, 1, 2, 3, 4, 5, 6, 7);
-
-        const spline = new THREE.CatmullRomCurve3(points);
-        const divisions = Math.round(12 * points.length);
-        const point = new THREE.Vector3();
-        const color = new THREE.Color();
-
-        for (let i = 0, l = divisions; i < l; i++) {
-
-            const t = i / l;
-
-            spline.getPoint(t, point);
-            positions.push(point.x, point.y, point.z);
-
-            color.setHSL(t, 1.0, 0.5, THREE.SRGBColorSpace);
-            colors.push(color.r, color.g, color.b);
-        }
-
-        // Line2 ( LineGeometry, LineMaterial )
-
-        const geometry = new LineGeometry();
-        geometry.setPositions(positions);
-        geometry.setColors(colors);
-
-        let matLine = new LineMaterial({
-
+    const line2 = useMemo(() => new LineSegments2(), []);
+    const lineMaterial = useMemo(() => {
+        const material = new LineMaterial({
             color: 0xffffff,
-            linewidth: 0.1, // in world units with size attenuation, pixels otherwise
+            linewidth: 0.05, // in world units with size attenuation, pixels otherwise
             vertexColors: true,
 
             //resolution:  // to be set by renderer, eventually
             dashed: false,
             alphaToCoverage: true,
-
+            worldUnits: true
         });
 
-        let line = new Line2(geometry, matLine);
-        line.computeLineDistances();
-        line.scale.set(1, 1, 1);
+        material.onBeforeCompile = (shader) => {
 
-        if (groupRef.current && groupRef.current.add) {
-            groupRef.current.add(line);
-        }
+            shader.fragmentShader = ModifiedLineFragment;
+
+            console.log(shader.vertexShader);
+            console.log(shader.fragmentShader);
+        };
+        return material;
     }, []);
 
-    return <group ref={groupRef}></group>;
+    const lineGeom = useMemo(() => {
+        const geom = new LineSegmentsGeometry();
+
+        geom.setPositions([0.1, 0, 0, -0.1, 0, 0]);
+        geom.setColors([0.0, 1.0, 0.0, 0, 0, 1]);
+
+        geom.scale(1, 1, 1);
+        return geom;
+    }, []);
+
+    useLayoutEffect(() => {
+        line2.computeLineDistances();
+    }, [line2]);
+
+    useEffect(() => {
+        return () => lineGeom.dispose();
+    }, [lineGeom]);
+
+    return <primitive object={line2}>
+        <primitive object={lineGeom} attach="geometry" />
+        <primitive object={lineMaterial} attach="material" />
+    </primitive>;
 }
