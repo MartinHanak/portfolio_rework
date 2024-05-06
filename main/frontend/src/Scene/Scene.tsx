@@ -10,6 +10,7 @@ import BasicPlane from './BasicPlane';
 import MeshWithSkip from './MeshWithSkip';
 import Triangle from './Triangle';
 import TriangleWithFace from './TriangleWithFace';
+import Line3Test from './Line3Test';
 
 function Box(props: MeshProps) {
     // This reference will give us direct access to the mesh
@@ -43,9 +44,10 @@ export default function Scene() {
         <ambientLight intensity={Math.PI / 2} />
         <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} decay={0} intensity={Math.PI} />
         <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+        {/*
         <Box position={[-1.2, 0, 0]} />
         <Box position={[1.2, 0, 0]} />
-        <Test />
+         <Test />
 
         <WireTest />
 
@@ -61,6 +63,10 @@ export default function Scene() {
 
         <Triangle />
 
-        <TriangleWithFace />
+        <TriangleWithFace /> */}
+
+        <OrbitControls />
+
+        <Line3Test />
     </>;
 }
