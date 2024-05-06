@@ -1,6 +1,7 @@
 uniform vec3 diffuse;
 uniform float opacity;
 uniform float linewidth;
+varying float vSkip;
 
 #ifdef USE_DASH
 
@@ -66,6 +67,7 @@ vec2 closestLineToLine(vec3 p1, vec3 p2, vec3 p3, vec3 p4) {
 }
 
 void main() {
+    if( vSkip > 0.7) discard;
 
     #include <clipping_planes_fragment>
 
@@ -86,8 +88,8 @@ void main() {
         vec3 lineDir = worldEnd - worldStart;
         vec2 params = closestLineToLine( worldStart, worldEnd, vec3( 0.0, 0.0, 0.0 ), rayEnd );
 
-        vec3 p1 = worldStart + lineDir * params.x; // check if params.x is truly from 0 to 1
-        vec3 p2 = rayEnd * params.y; // check if worldPos.xyz and rayEnd differ (slighly) with distance from the line
+        vec3 p1 = worldStart + lineDir * params.x;
+        vec3 p2 = rayEnd * params.y;
         vec3 delta = p1 - p2;
         float len = length( delta );
         float norm = len / linewidth;
@@ -149,7 +151,7 @@ void main() {
     #include <color_fragment>
     
 
-    gl_FragColor = vec4( delta * 10.0, alpha );
+    gl_FragColor = vec4( diffuseColor.rgb, alpha );
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>

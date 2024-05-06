@@ -4,8 +4,12 @@ import { Mesh } from 'three';
 import Test from './Test';
 import WireTest from './WireTest';
 import FatLineTest from './FatLineTest';
-import { OrbitControls } from '@react-three/drei';
+import { FlyControls, KeyboardControls, OrbitControls } from '@react-three/drei';
 import WireFromMesh from './WireFromMesh';
+import BasicPlane from './BasicPlane';
+import MeshWithSkip from './MeshWithSkip';
+import Triangle from './Triangle';
+import TriangleWithFace from './TriangleWithFace';
 
 function Box(props: MeshProps) {
     // This reference will give us direct access to the mesh
@@ -50,5 +54,13 @@ export default function Scene() {
         <WireFromMesh />
 
         <OrbitControls />
+
+        <MeshWithSkip />
+
+        <BasicPlane />
+
+        <Triangle />
+
+        <TriangleWithFace />
     </>;
 }

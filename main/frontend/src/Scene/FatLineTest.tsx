@@ -20,8 +20,6 @@ export default function FatLineTest() {
 
             shader.fragmentShader = ModifiedLineFragment;
 
-            console.log(shader.vertexShader);
-            console.log(shader.fragmentShader);
         };
         return material;
     }, []);
