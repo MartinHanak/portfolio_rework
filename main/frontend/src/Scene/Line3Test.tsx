@@ -28,8 +28,8 @@ export default function Line3Test() {
 
         const lineSegmentsGeo = new LineSegmentsGeometry3();
 
-        lineSegmentsGeo.fromWireframeGeometry(new WireframeGeometry(boxGeo));
-        // lineSegmentsGeo.fromMesh(box);
+        //lineSegmentsGeo.fromWireframeGeometry(new WireframeGeometry(boxGeo));
+        lineSegmentsGeo.fromMesh(box);
         console.log(lineSegmentsGeo);
         return lineSegmentsGeo;
     }, []);
