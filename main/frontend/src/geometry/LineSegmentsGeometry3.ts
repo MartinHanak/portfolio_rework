@@ -1,4 +1,4 @@
-import { Mesh, Vector3 } from "three";
+import { BufferAttribute, BufferGeometry, Mesh, Vector3 } from "three";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import GraphVertex, { faceNormal } from "./GraphVertex";
 
@@ -7,7 +7,7 @@ export default class LineSegmentsGeometry3 extends LineSegmentsGeometry {
     super();
   }
 
-  fromMesh(mesh: Mesh) {
+  fromMesh(mesh: Mesh, facesGeometry?: BufferGeometry) {
     // convert mesh.geometry to wire geometry
     const geometry = mesh.geometry;
 
@@ -67,7 +67,7 @@ export default class LineSegmentsGeometry3 extends LineSegmentsGeometry {
     }
 
     // traverse graph, set positions and other attributes
-    const traversedVertices = traverse(vertexGraph);
+    const traversedVertices = traverse(vertexGraph, facesGeometry);
     this.setPositions(traversedVertices);
 
     // correct:
@@ -188,9 +188,28 @@ function vectorHash(vec: Vector3) {
   return `${vec.x},${vec.y},${vec.z}`;
 }
 
-function traverse(graph: Map<string, GraphVertex>) {
+function faceHash([start, end, third]: [
+  GraphVertex,
+  GraphVertex,
+  GraphVertex
+]) {
+  return `${vectorHash(start.position)}-${vectorHash(
+    end.position
+  )}-${vectorHash(third.position)}`;
+}
+
+function traverse(
+  graph: Map<string, GraphVertex>,
+  facesGeometry?: BufferGeometry
+) {
   const vertices = [];
+  const faceVertices: number[] = [];
+  const faceNormals: number[] = [];
+  const faceFirstNeighbors: number[] = [];
+  const faceSecondNeighbors: number[] = [];
   const visitedEdges = new Set<string>();
+  const visitedFaces = new Set<string>();
+  const vertexToFace = new Map<string, Set<string>>();
   const visitedVertices = new Set<GraphVertex>();
   let firstVertex: GraphVertex | null = null;
 
@@ -215,6 +234,43 @@ function traverse(graph: Map<string, GraphVertex>) {
       // mark as visited
       visitedVertices.add(currentVertex);
 
+      // check all faces  on currentVertex
+      for (const face of currentVertex.faces) {
+        if (
+          isUniqueFace(
+            face[0].position,
+            face[1].position,
+            face[2].position,
+            visitedFaces,
+            vertexToFace
+          )
+        ) {
+          // face vertex positions
+          faceVertices.push(
+            ...face[0].position,
+            ...face[1].position,
+            ...face[2].position
+          );
+
+          // face normals
+          // every vertex needs info about the normal
+          const normal = faceNormal(face);
+          faceNormals.push(...normal, ...normal, ...normal);
+
+          // each vertex needs info about its neighbors
+          faceFirstNeighbors.push(
+            ...face[1].position,
+            ...face[2].position,
+            ...face[0].position
+          );
+          faceSecondNeighbors.push(
+            ...face[2].position,
+            ...face[0].position,
+            ...face[1].position
+          );
+        }
+      }
+
       for (const neighbor of currentVertex.neighbors) {
         // if neighbors not visited, add them
         if (!visitedVertices.has(neighbor)) neighbors.push(neighbor);
@@ -230,23 +286,43 @@ function traverse(graph: Map<string, GraphVertex>) {
         if (!visitedEdges.has(hash1) && !visitedEdges.has(hash2)) {
           visitedEdges.add(hash1);
 
-          // check shared faces
-          const commonFaces = currentVertex.commonFacesWith(neighbor);
-          const normals = commonFaces.map((face) => faceNormal(face));
+          vertices.push(...currentVertex.position, ...neighbor.position);
 
-          if (commonFaces.length !== 2 || normals.length !== 2)
-            throw new Error("Edge should have two shared faces");
+          // // check shared faces
+          // const commonFaces = currentVertex.commonFacesWith(neighbor);
+          // const normals = commonFaces.map((face) => faceNormal(face));
 
-          const cameraView = new Vector3(1, 1, 1);
-          const dot1 = cameraView.dot(normals[0]);
-          const dot2 = cameraView.dot(normals[1]);
+          // if (commonFaces.length !== 2 || normals.length !== 2)
+          //   throw new Error("Edge should have two shared faces");
 
-          const dotProduct = normals[0].dot(normals[1]);
-          if (dotProduct < 0.5 && (dot1 > 0 || dot2 > 0))
-            vertices.push(...currentVertex.position, ...neighbor.position);
+          // const cameraView = new Vector3(1, 1, 1);
+          // const dot1 = cameraView.dot(normals[0]);
+          // const dot2 = cameraView.dot(normals[1]);
+
+          // const dotProduct = normals[0].dot(normals[1]);
+          // if (dotProduct < 0.5 && (dot1 > 0 || dot2 > 0))
+          //   vertices.push(...currentVertex.position, ...neighbor.position);
         }
       }
     }
+  }
+
+  if (facesGeometry) {
+    const verticesArray = new Float32Array(faceVertices);
+    const positionAttribute = new BufferAttribute(verticesArray, 3);
+    facesGeometry.setAttribute("position", positionAttribute);
+
+    const normalsArray = new Float32Array(faceNormals);
+    const normalsAttribute = new BufferAttribute(normalsArray, 3);
+    facesGeometry.setAttribute("aNormal", normalsAttribute);
+
+    const firstNeighbors = new Float32Array(faceFirstNeighbors);
+    const firstNeighborAttribute = new BufferAttribute(firstNeighbors, 3);
+    facesGeometry.setAttribute("aFirstNeighbor", firstNeighborAttribute);
+
+    const secondNeighbors = new Float32Array(faceSecondNeighbors);
+    const secondNeighborAttribute = new BufferAttribute(secondNeighbors, 3);
+    facesGeometry.setAttribute("aSecondNeighbor", secondNeighborAttribute);
   }
 
   return vertices;

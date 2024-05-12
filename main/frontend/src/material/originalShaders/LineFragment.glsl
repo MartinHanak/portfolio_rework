@@ -143,13 +143,15 @@ void main() {
 
     #endif
 
-    vec4 diffuseColor = vec4( diffuse, alpha );
+    //alpha = step(0.999999, alpha);
+
+    vec4 diffuseColor = vec4( 1.0, 0.0,0.0, alpha );
 
     #include <logdepthbuf_fragment>
     #include <color_fragment>
     
 
-    gl_FragColor = vec4( diffuseColor.rgb, alpha );
+    gl_FragColor = diffuseColor;
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
