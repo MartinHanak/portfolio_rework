@@ -1,16 +1,9 @@
 import { MeshProps, useFrame } from '@react-three/fiber';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Mesh } from 'three';
-import Test from './Test';
-import WireTest from './WireTest';
-import FatLineTest from './FatLineTest';
-import { FlyControls, KeyboardControls, OrbitControls } from '@react-three/drei';
-import WireFromMesh from './WireFromMesh';
-import BasicPlane from './BasicPlane';
-import MeshWithSkip from './MeshWithSkip';
-import Triangle from './Triangle';
-import TriangleWithFace from './TriangleWithFace';
+import { OrbitControls } from '@react-three/drei';
 import Line3Test from './Line3Test';
+import Triangle from './tests/Triangle';
 
 function Box(props: MeshProps) {
     // This reference will give us direct access to the mesh
@@ -64,6 +57,7 @@ export default function Scene() {
         <Triangle />
 
         <TriangleWithFace /> */}
+        <Triangle />
 
         <OrbitControls />
 

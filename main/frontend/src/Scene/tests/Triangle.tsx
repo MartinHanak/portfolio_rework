@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { LineMaterial, LineSegments2, LineSegmentsGeometry } from "three/examples/jsm/Addons.js";
 import * as THREE from 'three';
-import WithFacesLineVertex from '../shaders/withFaces/WithFacesLineVertex.glsl';
-import WithFacesFragment from '../shaders/withFaces/WithFacesFragment.glsl';
+import WithFacesLineVertex from '../../shaders/withFaces/WithFacesLineVertex.glsl';
+import WithFacesFragment from '../../shaders/withFaces/WithFacesFragment.glsl';
 
 export default function Triangle() {
     const line2 = useMemo(() => new LineSegments2(), []);
