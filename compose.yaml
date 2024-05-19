@@ -1,4 +1,17 @@
 services:
+  main-frontend-ssr:
+    container_name: dev-main-frontend-ssr
+    build:
+      context: ./main/frontend_ssr
+      dockerfile: Dockerfile.dev
+    volumes:
+      - type: bind
+        source: ./main/frontend_ssr
+        target: /app
+      # anonymous volume: do not include node_modules in bind mount
+      - /app/node_modules
+    ports:
+      - "8080:8080"
   main-frontend:
     container_name: dev-main-frontend
     build:
@@ -12,6 +25,9 @@ services:
       - /app/node_modules
     ports:
       - "8080:8080"
+    # old frontend solution - different profile not used by default
+    profiles:
+      - client-side-fe
   main-backend: &backend-config
     container_name: dev-main-backend
     build: &backend-build
