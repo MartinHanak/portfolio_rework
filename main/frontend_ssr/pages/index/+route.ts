@@ -7,7 +7,7 @@ import { redirect } from "vike/abort";
 const route: RouteSync = (pageContext): ReturnType<RouteSync> => {
   // TODO: redirect from Nginx
   if (pageContext.urlParsed.pathname === "/") {
-    throw redirect("/cs", 301);
+    throw redirect("/en", 301);
   } else {
     return true;
   }
