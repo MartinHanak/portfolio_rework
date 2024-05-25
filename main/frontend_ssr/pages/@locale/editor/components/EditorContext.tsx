@@ -1,15 +1,18 @@
-import { ReactNode, createContext, useContext, useState } from "react";
+import { MutableRefObject, ReactNode, createContext, useContext, useRef, useState } from "react";
+import { Camera, Matrix4 } from "three";
 
 interface IEditorContext {
     file: File | null;
     setFile: (file: File | null) => void;
+    cameraMatrix: MutableRefObject<Camera>;
+    cameraMatrixChange: (camera: Camera) => void;
 }
 
 interface IEditorContextProvider {
     children: ReactNode;
 }
 
-const editorContext = createContext<IEditorContext>({ file: null, setFile: () => { } });
+const editorContext = createContext<IEditorContext>({ file: null, setFile: () => { }, cameraMatrix: { current: new Camera() }, cameraMatrixChange: () => { } });
 
 export default function EditorContext({ children }: IEditorContextProvider) {
     const [file, setFile] = useState<File | null>(null);
@@ -18,8 +21,19 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         setFile(inputFile);
     };
 
+    const cameraMatrixRef = useRef<Camera>(new Camera());
 
-    return <editorContext.Provider value={{ file: file, setFile: handleFileChange }}>
+    const handleCameraMatrixChange = (camera: Camera) => {
+        cameraMatrixRef.current = camera;
+    };
+
+
+    return <editorContext.Provider value={{
+        file: file,
+        setFile: handleFileChange,
+        cameraMatrix: cameraMatrixRef,
+        cameraMatrixChange: handleCameraMatrixChange
+    }}>
         {children}
     </editorContext.Provider>;
 }

@@ -2,15 +2,22 @@ import { OrbitControls, useGLTF } from '@react-three/drei';
 import { useEditorContext } from './EditorContext';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { useFrame, useThree } from '@react-three/fiber';
+import { useControls } from 'leva';
 
-export default function EditorScene() {
+interface IEditorScene {
+    variant: 'selection' | 'display';
+}
+
+export default function EditorScene({ variant }: IEditorScene) {
     const [gltf, setGltf] = useState<GLTF>();
+    const camera = useThree(root => root.camera);
 
     const loader = useMemo(() => {
         return new GLTFLoader();
     }, []);
 
-    const { file } = useEditorContext();
+    const { file, cameraMatrix, cameraMatrixChange } = useEditorContext();
 
     const url = useMemo(() => {
         if (!file) return '';
@@ -34,6 +41,13 @@ export default function EditorScene() {
         return gltf.scene.children[0];
     }, [gltf]);
 
+    useFrame(() => {
+        if (variant === 'selection') {
+            cameraMatrixChange(camera);
+        } else {
+            camera.copy(cameraMatrix.current);
+        }
+    });
 
 
     return <>
@@ -48,7 +62,7 @@ export default function EditorScene() {
 
         {model && <primitive object={model} />}
 
-        <OrbitControls />
+        {variant === 'selection' && <OrbitControls />}
 
     </>;
 }
