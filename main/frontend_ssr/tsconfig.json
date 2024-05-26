@@ -19,7 +19,8 @@
     ],
     "types": [
       "vite/client",
-      "vike-react"
+      "vike-react",
+      "vite-plugin-glsl/ext"
     ],
     "jsx": "preserve",
     "jsxImportSource": "react"
