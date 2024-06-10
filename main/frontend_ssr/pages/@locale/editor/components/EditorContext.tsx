@@ -1,5 +1,5 @@
 import { MutableRefObject, ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { BufferAttribute, Camera, Matrix4, Mesh, Object3D } from "three";
+import { BufferAttribute, Camera, Float32BufferAttribute, Matrix4, Mesh, Object3D, Points, PointsMaterial } from "three";
 import { GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
 import Graph from "../../../../canvas/graph/Graph";
 import LineSegments3 from "../../../../canvas/mesh/LineSegments3";
@@ -14,13 +14,14 @@ interface IEditorContext {
     graph: Graph;
     line: LineSegments3;
     faces: LineFacesMesh;
+    points: Points;
 }
 
 interface IEditorContextProvider {
     children: ReactNode;
 }
 
-const editorContext = createContext<IEditorContext>({ file: null, setFile: () => { }, cameraMatrix: { current: new Camera() }, cameraMatrixChange: () => { }, originalModel: null, graph: new Graph(), line: new LineSegments3(), faces: new LineFacesMesh() });
+const editorContext = createContext<IEditorContext>({ file: null, setFile: () => { }, cameraMatrix: { current: new Camera() }, cameraMatrixChange: () => { }, originalModel: null, graph: new Graph(), line: new LineSegments3(), faces: new LineFacesMesh(), points: new Points() });
 
 export default function EditorContext({ children }: IEditorContextProvider) {
     // input file
@@ -108,6 +109,17 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         return faces;
     }, [geometryData]);
 
+    // points
+
+    const points = useMemo(() => {
+        const pointsMesh = new Points();
+        const material = new PointsMaterial({ vertexColors: true });
+        pointsMesh.material = material;
+
+        pointsMesh.geometry.setAttribute('position', new Float32BufferAttribute(graph.pointPositionsBuffer, 3));
+        return pointsMesh;
+    }, [graph]);
+
     return <editorContext.Provider value={{
         file: file,
         setFile: handleFileChange,
@@ -116,7 +128,8 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         originalModel: originalModel,
         graph: graph,
         line: lineMesh,
-        faces: facesMesh
+        faces: facesMesh,
+        points: points
     }}>
         {children}
     </editorContext.Provider>;

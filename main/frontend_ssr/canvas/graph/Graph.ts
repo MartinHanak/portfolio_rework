@@ -10,6 +10,14 @@ export default class Graph {
     return this.graph.size;
   }
 
+  get pointPositionsBuffer() {
+    const vertexPositions: number[] = [];
+    for (const vertex of this) {
+      vertexPositions.push(...vertex.position);
+    }
+    return new Float32Array(vertexPositions);
+  }
+
   constructor() {}
 
   setVertices(input: Mesh | BufferGeometry) {
