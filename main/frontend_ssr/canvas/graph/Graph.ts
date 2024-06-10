@@ -5,6 +5,11 @@ import faceNormal from "../utils/faceNormal";
 
 export default class Graph {
   private graph = new Map<string, GraphVertex>();
+
+  get size() {
+    return this.graph.size;
+  }
+
   constructor() {}
 
   setVertices(input: Mesh | BufferGeometry) {
