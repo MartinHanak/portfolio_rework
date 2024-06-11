@@ -131,6 +131,12 @@ export default class Graph {
     return result;
   }
 
+  findPath(start: GraphVertex, end: GraphVertex) {
+    const path: GraphVertex[] = [];
+
+    return path;
+  }
+
   private addVerticesFromFace(start: Vector3, end: Vector3, third: Vector3) {
     const triangleVertices = [start, end, third];
 
@@ -203,6 +209,13 @@ export default class Graph {
       visitedFaces.add(hashes[0]);
       return true;
     }
+  }
+
+  getVertex(position: [number, number, number]) {
+    const vec3 = new Vector3(...position);
+    const hash = vectorHash(vec3);
+
+    return this.graph.get(hash);
   }
 
   // custom iterator = BFS graph traversal

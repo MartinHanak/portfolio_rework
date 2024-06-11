@@ -1,12 +1,13 @@
 import { OrbitControls, Points, useGLTF } from '@react-three/drei';
 import { useEditorContext } from './EditorContext';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import { useControls } from 'leva';
 import Graph from '../../../../canvas/graph/Graph';
 import { Color, Float32BufferAttribute, Mesh, SRGBColorSpace } from 'three';
 import LineSegments3 from '../../../../canvas/mesh/LineSegments3';
+import GraphVertex from '../../../../canvas/graph/GraphVertex';
 
 interface IEditorScene {
     variant: 'selection' | 'display';
@@ -17,6 +18,8 @@ export default function EditorScene({ variant }: IEditorScene) {
 
     const { file, cameraMatrix, cameraMatrixChange, originalModel, line, faces, graph, points } = useEditorContext();
 
+    const selectedVertices = useRef<GraphVertex[]>([]);
+
     useFrame(() => {
         if (variant === 'selection') {
             cameraMatrixChange(camera);
@@ -26,13 +29,35 @@ export default function EditorScene({ variant }: IEditorScene) {
     });
 
     const handlePointClick = (e: ThreeEvent<MouseEvent>) => {
-        if (e.shiftKey) {
+        e.stopPropagation();
+
+        const index = e.index;
+        if (!index) return;
+
+        const positionAttribute = points.geometry.attributes['position'];
+        const position: [number, number, number] = [
+            positionAttribute.getX(index),
+            positionAttribute.getY(index),
+            positionAttribute.getZ(index)
+        ];
+
+        const vertex = graph.getVertex(position);
+        if (!vertex) return;
+
+
+        if (e.shiftKey && selectedVertices.current.length > 0) {
+
+            const previouslySelectedVertex = selectedVertices.current[selectedVertices.current.length - 1];
+
             // add points to selection = find shortest path (maybe biased by the angle ???) in the graph
 
             // points between = graph.findPath(start, end);
 
         } else {
             // select one new point, reset previous selection
+
+            selectedVertices.current = [vertex];
+
             const colors: number[] = [];
             const color = new Color();
 
@@ -49,8 +74,6 @@ export default function EditorScene({ variant }: IEditorScene) {
 
             points.geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
         }
-        console.log(e.index);
-        e.stopPropagation();
     };
 
 
