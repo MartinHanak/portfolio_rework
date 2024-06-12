@@ -32,7 +32,7 @@ export default function EditorScene({ variant }: IEditorScene) {
         e.stopPropagation();
 
         const index = e.index;
-        if (!index) return;
+        if (index === undefined) return;
 
         const positionAttribute = points.geometry.attributes['position'];
         const position: [number, number, number] = [
@@ -48,6 +48,8 @@ export default function EditorScene({ variant }: IEditorScene) {
         if (e.shiftKey && selectedVertices.current.length > 0) {
 
             const previouslySelectedVertex = selectedVertices.current[selectedVertices.current.length - 1];
+
+            console.log(graph.findPath(previouslySelectedVertex, vertex));
 
             // add points to selection = find shortest path (maybe biased by the angle ???) in the graph
 

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import Graph from "../../canvas/graph/Graph";
 import { BoxGeometry } from "three";
+import GraphVertex from "../../canvas/graph/GraphVertex";
 
 let graph = new Graph();
 
@@ -60,5 +61,28 @@ describe("Graph", () => {
 
     expect(eachVertexOnce).toBe(true);
     expect(visitedVertices.size).toBe(8);
+  });
+
+  it("should be able to find shortest path between vertices", () => {
+    const geometry = new BoxGeometry();
+    graph.setVertices(geometry);
+
+    let index = 0;
+    let firstVertex: GraphVertex | undefined = undefined;
+    let secondVertex: GraphVertex | undefined = undefined;
+    for (const vertex of graph) {
+      console.log(index);
+      if (index === 0) firstVertex = vertex;
+      if (index === 7) secondVertex = vertex;
+      index += 1;
+    }
+
+    if (!firstVertex || !secondVertex) throw new Error("No vertices defined");
+
+    const path = graph.findPath(firstVertex, secondVertex);
+    //const path = [];
+
+    console.log(path);
+    expect(path.length).toBe(2);
   });
 });

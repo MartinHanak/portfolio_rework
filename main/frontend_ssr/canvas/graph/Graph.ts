@@ -2,6 +2,7 @@ import { BufferGeometry, Mesh, Vector3 } from "three";
 import GraphVertex from "./GraphVertex";
 import { edgeHashes, faceHashes, vectorHash } from "../utils/hash";
 import faceNormal from "../utils/faceNormal";
+import Heap from "./Heap";
 
 export default class Graph {
   private graph = new Map<string, GraphVertex>();
@@ -133,6 +134,59 @@ export default class Graph {
 
   findPath(start: GraphVertex, end: GraphVertex) {
     const path: GraphVertex[] = [];
+
+    const shortestPaths = new Map<GraphVertex, number>();
+
+    const heap = new Heap<GraphVertex>();
+    heap.push(start, 0);
+
+    while (heap.front() !== null) {
+      const closestVertex = heap.pop();
+
+      if (shortestPaths.has(closestVertex.value)) continue;
+
+      shortestPaths.set(closestVertex.value, closestVertex.weight);
+
+      // if end found, skip the rest
+      if (closestVertex.value === end) break;
+
+      for (const neighbor of closestVertex.value.neighbors) {
+        if (!shortestPaths.has(neighbor)) {
+          // all weights = 1 for now
+          heap.push(neighbor, closestVertex.weight + 1);
+        }
+      }
+    }
+
+    // reconstruct the path
+    const endDistance = shortestPaths.get(end);
+    if (!endDistance) throw Error("End vertex not found in the graph");
+
+    let currentVertex = end;
+    while (currentVertex !== start) {
+      path.push(currentVertex);
+
+      let nextVertex: GraphVertex = currentVertex;
+      let closestDistance: number = Infinity;
+
+      // loop all currentVertex neighbors
+      // find one that was visited, with shortest path
+      for (const neighbor of currentVertex.neighbors) {
+        const distance = shortestPaths.get(neighbor);
+
+        if (distance !== undefined && distance < closestDistance) {
+          nextVertex = neighbor;
+          closestDistance = distance;
+        }
+      }
+
+      if (nextVertex === currentVertex) throw new Error("Path not found");
+
+      // next step
+      currentVertex = nextVertex;
+    }
+
+    path.reverse();
 
     return path;
   }

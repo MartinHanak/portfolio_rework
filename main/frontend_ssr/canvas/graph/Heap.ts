@@ -4,6 +4,10 @@ export default class Heap<T> {
     value: T;
   }[];
 
+  get size() {
+    return this.heap.length - 1;
+  }
+
   constructor() {
     this.heap = [];
     // 0th node skipped to simplify math
