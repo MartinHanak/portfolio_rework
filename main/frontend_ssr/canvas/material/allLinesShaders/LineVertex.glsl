@@ -14,16 +14,6 @@ attribute vec3 instanceEnd;
 attribute vec3 instanceColorStart;
 attribute vec3 instanceColorEnd;
 
-// if non-zero, then always display with this width;
-attribute float segmentWidth;
-// normals of adjacent faces in the model space;
-attribute vec4 neighborOne; 
-attribute vec4 neighborTwo;
-
-flat varying float vSegmentWidth;
-flat varying vec3 vNormalFaceOne;
-flat varying vec3 vNormalFaceTwo;
-
 #ifdef WORLD_UNITS
 
     varying vec4 worldPos;
@@ -67,7 +57,6 @@ void trimSegment( const in vec4 start, inout vec4 end ) {
 }
 
 void main() {
-    vSegmentWidth = segmentWidth;
 
     #ifdef USE_COLOR
 
@@ -87,9 +76,6 @@ void main() {
     // camera space
     vec4 start = modelViewMatrix * vec4( instanceStart, 1.0 );
     vec4 end = modelViewMatrix * vec4( instanceEnd, 1.0 );
-
-    vec4 neighborOneCamera = modelViewMatrix * vec4(neighborOne.xyz, 1.0);
-    vec4 neighborTwoCamera = modelViewMatrix * vec4(neighborTwo.xyz, 1.0);
 
     #ifdef WORLD_UNITS
 
@@ -126,9 +112,6 @@ void main() {
     // clip space
     vec4 clipStart = projectionMatrix * start;
     vec4 clipEnd = projectionMatrix * end;
-
-    vec4 clipNeighborOne = projectionMatrix * neighborOneCamera;
-    vec4 clipNeighborTwo = projectionMatrix * neighborTwoCamera;
 
     // ndc space
     vec3 ndcStart = clipStart.xyz / clipStart.w;
@@ -216,24 +199,6 @@ void main() {
         clip.xy += offset;
 
     #endif
-
-    // project from clip space into ndc space
-    vec4 projStart =  clipStart / clipStart.w;
-    vec4 projEnd =clipEnd / clipEnd.w;
-    vec4 projNeighborOne =  clipNeighborOne / clipNeighborOne.w;
-    vec4 projNeighborTwo =  clipNeighborTwo / clipNeighborTwo.w;
-
-    vec3 startToEnd = projEnd.xyz - projStart.xyz;
-    // 4th component in the neighbor attribute = order of the vertex in the face
-    // neighborOne.w = 1 or -1
-    vec3 startToNeighborOne = neighborOne.w * (projNeighborOne.xyz - projStart.xyz);
-    vec3 startToNeighborTwo = neighborTwo.w * (projNeighborTwo.xyz - projStart.xyz);
-
-    vec3 normalOne = normalize(cross(startToEnd, startToNeighborOne));
-    vec3 normalTwo = normalize(cross(startToEnd, startToNeighborTwo));
-
-    vNormalFaceOne = normalOne;
-    vNormalFaceTwo = normalTwo;
 
     gl_Position = clip;
 

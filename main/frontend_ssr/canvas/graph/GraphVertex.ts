@@ -1,5 +1,10 @@
 import { Vector3 } from "three";
 
+export enum FaceVertexOrder {
+  forward = 1,
+  backward = -1,
+}
+
 export default class GraphVertex {
   // hash = position stored as string
   hash: string;
@@ -76,6 +81,62 @@ export default class GraphVertex {
         commonFaces.push([this, vec2, vertex]);
       }
 
+    // one common face = one sided plane
+    // add the same face in the opposite order
+    if (commonFaces.length === 1) {
+      const originalFace = commonFaces[1];
+      const oppositeFace: [GraphVertex, GraphVertex, GraphVertex] = [
+        originalFace[0],
+        originalFace[2],
+        originalFace[1],
+      ];
+      commonFaces.push(oppositeFace);
+    }
+
     return commonFaces;
+  }
+
+  commonNeighborsWith(vertex: GraphVertex) {
+    const commonFaces = this.commonFacesWith(vertex);
+
+    if (commonFaces.length !== 2)
+      throw new Error("Vertices do not share 2 common neighbors");
+
+    const neighborOneIndex = commonFaces[0].findIndex(
+      (faceVertex) => faceVertex !== this && faceVertex !== vertex
+    );
+    const neighborTwoIndex = commonFaces[1].findIndex(
+      (faceVertex) => faceVertex !== this && faceVertex !== vertex
+    );
+
+    if (neighborOneIndex === -1 || neighborTwoIndex === -1) {
+      throw new Error("Neighbor not found from the common faces");
+    }
+
+    const neighborOne = commonFaces[0][neighborOneIndex];
+    const neighborTwo = commonFaces[1][neighborTwoIndex];
+
+    // order of the neighbor within the face
+    // if it is 3rd = order = this, vertex, neighbor
+    // if it is 2nd = order = this, neighbor, vertex
+    const neighborOneOrder =
+      neighborOneIndex === 2
+        ? FaceVertexOrder.forward
+        : FaceVertexOrder.backward;
+    const neighborTwoOrder =
+      neighborTwoIndex === 2
+        ? FaceVertexOrder.forward
+        : FaceVertexOrder.backward;
+
+    return [
+      {
+        neighbor: neighborOne,
+        order: neighborOneOrder,
+      },
+      {
+        neighbor: neighborTwo,
+        order: neighborTwoOrder,
+      },
+    ];
   }
 }

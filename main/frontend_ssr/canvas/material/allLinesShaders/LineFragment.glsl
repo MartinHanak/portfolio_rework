@@ -2,10 +2,6 @@ uniform vec3 diffuse;
 uniform float opacity;
 uniform float linewidth;
 
-flat varying float vSegmentWidth;
-flat varying vec3 vNormalFaceOne;
-flat varying vec3 vNormalFaceTwo;
-
 #ifdef USE_DASH
 
     uniform float dashOffset;
@@ -70,21 +66,6 @@ vec2 closestLineToLine(vec3 p1, vec3 p2, vec3 p3, vec3 p4) {
 }
 
 void main() {
-
-    // conventiional camera direction in the camera space
-    vec3 cameraDirection = vec3(0.0, 0.0, -1.0);
-    float dotProdOne = dot(cameraDirection, vNormalFaceOne);
-    float dotProdTwo = dot(cameraDirection, vNormalFaceTwo);
-
-    if(dotProdOne * dotProdTwo  < 0.0) {
-        // check direction of normal vectors
-        // if one back and and forward = edge
-
-    } else if (vSegmentWidth < 0.01) {
-        // check if segmentWidth defined
-        // skip the fragment completely if segmentWidth zero
-         discard;
-    }
 
     #include <clipping_planes_fragment>
 

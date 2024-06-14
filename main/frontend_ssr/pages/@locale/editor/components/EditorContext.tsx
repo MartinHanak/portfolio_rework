@@ -1,5 +1,5 @@
 import { MutableRefObject, ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { BufferAttribute, Camera, Float32BufferAttribute, Matrix4, Mesh, Object3D, Points, PointsMaterial } from "three";
+import { BufferAttribute, Camera, Float32BufferAttribute, InstancedBufferAttribute, Matrix4, Mesh, Object3D, Points, PointsMaterial } from "three";
 import { GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
 import Graph from "../../../../canvas/graph/Graph";
 import LineSegments3 from "../../../../canvas/mesh/LineSegments3";
@@ -84,6 +84,19 @@ export default function EditorContext({ children }: IEditorContextProvider) {
     const lineMesh = useMemo(() => {
         const line = new LineSegments3();
         line.geometry.setPositions(geometryData.lines.positions);
+
+        const segmentWidthArray = new Float32Array(geometryData.lines.segmentWidth);
+        const widthAttribute = new InstancedBufferAttribute(segmentWidthArray, 1);
+        line.geometry.setAttribute('segmentWidth', widthAttribute);
+
+        const neighborOneArray = new Float32Array(geometryData.lines.neighborOne);
+        const neighborOneAttribute = new InstancedBufferAttribute(neighborOneArray, 4);
+        line.geometry.setAttribute('neighborOne', neighborOneAttribute);
+
+        const neighborTwoArray = new Float32Array(geometryData.lines.neighborTwo);
+        const neighborTwoAttribute = new InstancedBufferAttribute(neighborTwoArray, 4);
+        line.geometry.setAttribute('neighborTwo', neighborTwoAttribute);
+
         return line;
     }, [geometryData]);
 

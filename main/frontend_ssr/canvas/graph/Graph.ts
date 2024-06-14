@@ -78,6 +78,9 @@ export default class Graph {
       };
       lines: {
         positions: number[];
+        segmentWidth: number[];
+        neighborOne: number[];
+        neighborTwo: number[];
       };
     } = {
       faces: {
@@ -88,6 +91,9 @@ export default class Graph {
       },
       lines: {
         positions: [],
+        segmentWidth: [],
+        neighborOne: [],
+        neighborTwo: [],
       },
     };
 
@@ -126,7 +132,31 @@ export default class Graph {
       for (const neighbor of vertex.neighbors) {
         if (!this.isUniqueEdge([vertex, neighbor], visitedEdges)) continue;
 
+        // line segment start and end
         result.lines.positions.push(...vertex.position, ...neighbor.position);
+
+        // common neighbors
+        const commonNeighbors = vertex.commonNeighborsWith(neighbor);
+        if (commonNeighbors.length !== 2)
+          throw new Error(
+            "Vertices do not share two common neihbors. Neighbors length: " +
+              commonNeighbors.length
+          );
+
+        const neighborOne = commonNeighbors[0];
+        const neighborTwo = commonNeighbors[1];
+
+        result.lines.neighborOne.push(
+          ...neighborOne.neighbor.position,
+          neighborOne.order
+        );
+        result.lines.neighborTwo.push(
+          ...neighborTwo.neighbor.position,
+          neighborTwo.order
+        );
+
+        // line segment width = 0 by default = only edges
+        result.lines.segmentWidth.push(0);
       }
     }
     return result;
