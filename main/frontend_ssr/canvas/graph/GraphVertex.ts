@@ -84,7 +84,7 @@ export default class GraphVertex {
     // one common face = one sided plane
     // add the same face in the opposite order
     if (commonFaces.length === 1) {
-      const originalFace = commonFaces[1];
+      const originalFace = commonFaces[0];
       const oppositeFace: [GraphVertex, GraphVertex, GraphVertex] = [
         originalFace[0],
         originalFace[2],

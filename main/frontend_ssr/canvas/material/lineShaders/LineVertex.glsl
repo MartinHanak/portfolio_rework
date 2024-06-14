@@ -219,7 +219,7 @@ void main() {
 
     // project from clip space into ndc space
     vec4 projStart =  clipStart / clipStart.w;
-    vec4 projEnd =clipEnd / clipEnd.w;
+    vec4 projEnd = clipEnd / clipEnd.w;
     vec4 projNeighborOne =  clipNeighborOne / clipNeighborOne.w;
     vec4 projNeighborTwo =  clipNeighborTwo / clipNeighborTwo.w;
 
