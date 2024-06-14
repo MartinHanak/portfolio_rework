@@ -80,10 +80,13 @@ void main() {
         // check direction of normal vectors
         // if one back and and forward = edge
 
+    } else if(dotProdOne < 0.0 && dotProdTwo < 0.0) {
+        // both faces back to the camera = do not render 
+        discard;
     } else if (vSegmentWidth < 0.01) {
         // check if segmentWidth defined
         // skip the fragment completely if segmentWidth zero
-         discard;
+        discard;
     }
 
     #include <clipping_planes_fragment>
