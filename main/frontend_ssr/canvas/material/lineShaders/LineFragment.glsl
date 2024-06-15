@@ -172,8 +172,10 @@ void main() {
     #include <logdepthbuf_fragment>
     #include <color_fragment>
     
+    // TODO: remove
+    vec4 testColor = vec4(1.0, 0.0, 0.0, 1.0);
 
-    gl_FragColor = diffuseColor;
+    gl_FragColor = vec4(testColor.xyz, diffuseColor.w);
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>

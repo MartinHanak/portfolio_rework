@@ -27,6 +27,11 @@ void main() {
 
     start.xyz = start.xyz + edge2Normal * hw + intersectionMultiplier * edge2;
 
+    // shift in the face normal direction
+    // camera space
+    //vec3 faceNormal = cross(edge1, edge2);
+    //start.xyz = start.xyz - faceNormal * hw ;
+
     vec4 clip = projectionMatrix * start;
 
     gl_Position = clip;
