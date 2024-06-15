@@ -4,6 +4,7 @@ import { GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
 import Graph from "../../../../canvas/graph/Graph";
 import LineSegments3 from "../../../../canvas/mesh/LineSegments3";
 import LineFacesMesh from "../../../../canvas/mesh/LineFacesMesh";
+import FaceWithEdgesMaterial from "../../../../canvas/material/FaceWithEdgesMaterial";
 
 interface IEditorContext {
     file: File | null;
@@ -103,9 +104,16 @@ export default function EditorContext({ children }: IEditorContextProvider) {
     const facesMesh = useMemo(() => {
         const faces = new LineFacesMesh();
 
+        // TODO: remove after test
+        // faces.material = new FaceWithEdgesMaterial();
+
         const verticesArray = new Float32Array(geometryData.faces.positions);
         const positionAttribute = new BufferAttribute(verticesArray, 3);
         faces.geometry.setAttribute("position", positionAttribute);
+
+        const orderArray = new Float32Array(geometryData.faces.vertexOrder);
+        const orderAttribute = new BufferAttribute(orderArray, 1);
+        faces.geometry.setAttribute("aOrder", orderAttribute);
 
         const normalsArray = new Float32Array(geometryData.faces.normals);
         const normalsAttribute = new BufferAttribute(normalsArray, 3);

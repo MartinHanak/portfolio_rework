@@ -73,6 +73,7 @@ export default class Graph {
       faces: {
         positions: number[];
         normals: number[];
+        vertexOrder: number[];
         firstNeighbors: number[];
         secondNeighbors: number[];
       };
@@ -86,6 +87,7 @@ export default class Graph {
       faces: {
         positions: [],
         normals: [],
+        vertexOrder: [],
         firstNeighbors: [],
         secondNeighbors: [],
       },
@@ -109,6 +111,9 @@ export default class Graph {
           ...face[1].position,
           ...face[2].position
         );
+
+        // face vertex order
+        result.faces.vertexOrder.push(0, 1, 2);
 
         // face normals
         // every vertex needs info about the normal
