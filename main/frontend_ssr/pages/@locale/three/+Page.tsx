@@ -1,18 +1,23 @@
-import { useControls } from "leva";
-import { useEffect, useRef } from "react";
-
-
 import * as THREE from 'three';
-import { GPUStatsPanel, GeometryUtils, Line2, LineGeometry, LineMaterial, OrbitControls } from "three/examples/jsm/Addons.js";
-import GUI from "three/examples/jsm/libs/lil-gui.module.min.js";
-import Stats from 'three/addons/libs/stats.module.js';
 
+import Stats from 'three/addons/libs/stats.module.js';
+import { GPUStatsPanel } from 'three/addons/utils/GPUStatsPanel.js';
+
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import * as GeometryUtils from 'three/addons/utils/GeometryUtils.js';
+import { useControls } from 'leva';
+import { useEffect, useRef } from 'react';
 
 export default function Page() {
     const { backgroundColor } = useControls({ backgroundColor: '#2a2727' });
     const container = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
+        if (!container.current) return;
         // viewport
         let insetWidth = 200;
         let insetHeight = 200;
@@ -20,13 +25,12 @@ export default function Page() {
         let stats: Stats;
 
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(0x000000, 0.0);
+        renderer.setClearColor(0x000000, 1.0);
         renderer.setAnimationLoop(animate);
-        if (container.current)
-            container.current.appendChild(renderer.domElement);
+        container.current.appendChild(renderer.domElement);
 
         const scene = new THREE.Scene();
 
@@ -115,6 +119,15 @@ export default function Page() {
         stats.showPanel(0);
 
         initGui();
+
+        console.log(renderer);
+        console.log(renderer.getContext().getContextAttributes());
+        //console.log(line.material.vertexShader);
+        //console.log(line.material.fragmentShader);
+        console.log(THREE);
+        console.log(line);
+        console.log(line.material);
+        console.log(line.geometry);
 
 
         function animate() {
