@@ -8,6 +8,7 @@ import Graph from '../../../../canvas/graph/Graph';
 import { Color, Float32BufferAttribute, Mesh, SRGBColorSpace } from 'three';
 import LineSegments3 from '../../../../canvas/mesh/LineSegments3';
 import GraphVertex from '../../../../canvas/graph/GraphVertex';
+import FatLine from '../../../../canvas/testing/FatLine';
 
 interface IEditorScene {
     variant: 'selection' | 'display';
@@ -85,10 +86,14 @@ export default function EditorScene({ variant }: IEditorScene) {
         <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
 
 
-        {!originalModel && <mesh>
-            <boxGeometry />
-            <meshBasicMaterial />
-        </mesh>}
+        {!originalModel &&
+            <>
+                <mesh>
+                    <boxGeometry />
+                    <meshBasicMaterial />
+                </mesh>
+                <FatLine />
+            </>}
 
         {variant === 'selection' && originalModel && <primitive object={originalModel} />}
 
