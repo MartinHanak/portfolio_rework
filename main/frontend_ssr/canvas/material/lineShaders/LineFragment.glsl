@@ -144,9 +144,7 @@ void main() {
             float dlen = fwidth( len2 );
 
             if ( abs( vUv.y ) > 1.0 ) {
-
                 alpha = 1.0 - smoothstep( 1.0 - dlen, 1.0 + dlen, len2 );
-
             }
 
         #else
@@ -165,7 +163,6 @@ void main() {
 
     #endif
 
-    //alpha = step(0.999999, alpha);
 
     vec4 diffuseColor = vec4( 1.0, 0.0,0.0, alpha );
 

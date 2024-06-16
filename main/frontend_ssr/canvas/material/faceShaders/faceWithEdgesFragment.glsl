@@ -17,6 +17,11 @@ void main() {
       closestSide = 2;
    }
 
+   if(vTriangleSideDistance.x < closestDistance) {
+      closestDistance = vTriangleSideDistance.x;
+      closestSide = 0;
+   }
+
 
    float minSideDistance = vTriangleSideDistance[closestSide];
 
@@ -25,8 +30,8 @@ void main() {
    
 
    // if edge = full width;
-
-   float width = vWidth[1];
+   vec3 test = vec3(0.05);
+   float width = test[closestSide];
 
    float mixWidth = 0.01;
    float step = smoothstep(width , width + mixWidth, minSideDistance);

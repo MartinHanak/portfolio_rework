@@ -29,8 +29,8 @@ void main() {
 
     // shift in the face normal direction
     // camera space
-    //vec3 faceNormal = cross(edge1, edge2);
-    //start.xyz = start.xyz - faceNormal * hw ;
+    vec3 faceNormal = cross(edge1, edge2);
+    start.xyz = start.xyz - faceNormal * hw ;
 
     vec4 clip = projectionMatrix * start;
 

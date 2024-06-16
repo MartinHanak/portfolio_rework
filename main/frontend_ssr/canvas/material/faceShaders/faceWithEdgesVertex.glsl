@@ -50,13 +50,11 @@ void main() {
 
     vTriangleSideDistance[order] = height;
 
-    int indexZero = int(mod(float(order) + 3.0, 3.0));
+    int indexZero = int(mod(float(order) + 0.0, 3.0));
     int indexOne = int(mod(float(order) + 1.0, 3.0));
     int indexTwo = int(mod(float(order) + 2.0, 3.0));
 
-    vWidth[indexZero] = baseWidth / power ;
-    vWidth[indexOne] = baseWidth  /powerNeighborOne;
-    vWidth[indexTwo] = baseWidth /powerNeighborTwo;
+    vWidth = vec3(baseWidth);
 
     vec4 clip = projectionMatrix * start;
 

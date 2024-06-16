@@ -85,6 +85,7 @@ export default function EditorContext({ children }: IEditorContextProvider) {
     const lineMesh = useMemo(() => {
         const line = new LineSegments3();
         line.geometry.setPositions(geometryData.lines.positions);
+        line.computeLineDistances();
 
         const segmentWidthArray = new Float32Array(geometryData.lines.segmentWidth);
         const widthAttribute = new InstancedBufferAttribute(segmentWidthArray, 1);
@@ -105,7 +106,7 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         const faces = new LineFacesMesh();
 
         // TODO: remove after test
-        // faces.material = new FaceWithEdgesMaterial();
+        //faces.material = new FaceWithEdgesMaterial();
 
         const verticesArray = new Float32Array(geometryData.faces.positions);
         const positionAttribute = new BufferAttribute(verticesArray, 3);
