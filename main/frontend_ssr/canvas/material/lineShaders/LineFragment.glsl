@@ -119,7 +119,18 @@ void main() {
             #ifdef USE_ALPHA_TO_COVERAGE
 
                 float dnorm = fwidth( norm );
-                alpha = 1.0 - smoothstep( 0.5 - dnorm, 0.5 + dnorm, norm );
+                // TODO: different condition here: apply only along the line
+                 float lineLength = length(lineDir);
+                 vec3 relativePos = worldPos.xyz - worldStart;
+                 float dotProduct = dot(relativePos, lineDir);
+                 float relativePosLength = length(relativePos);
+                 if(dotProduct > 0.0 && relativePosLength < lineLength ) {
+                    alpha = 1.0 - smoothstep( 0.5 - dnorm, 0.5 + dnorm, norm );
+                 } else {
+                    // line endcaps: problem if alpha not 0 or 1
+                    // do not use smoothstep here
+                     alpha = 1.0 - step(0.5 , norm );
+                 }
 
             #else
 

@@ -1,14 +1,8 @@
-import { OrbitControls, Points, useGLTF } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { useEditorContext } from './EditorContext';
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { GLTF, GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { useRef } from 'react';
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
-import { useControls } from 'leva';
-import Graph from '../../../../canvas/graph/Graph';
-import { Color, Float32BufferAttribute, Mesh, SRGBColorSpace } from 'three';
-import LineSegments3 from '../../../../canvas/mesh/LineSegments3';
-import GraphVertex from '../../../../canvas/graph/GraphVertex';
-import FatLine from '../../../../canvas/testing/FatLine';
+import { Color, Float32BufferAttribute, Mesh, SRGBColorSpace } from 'three'; import GraphVertex from '../../../../canvas/graph/GraphVertex';
 
 interface IEditorScene {
     variant: 'selection' | 'display';
@@ -92,7 +86,7 @@ export default function EditorScene({ variant }: IEditorScene) {
                     <boxGeometry />
                     <meshBasicMaterial />
                 </mesh>
-                <FatLine />
+                {/* <FatLine /> */}
             </>}
 
         {variant === 'selection' && originalModel && <primitive object={originalModel} />}
