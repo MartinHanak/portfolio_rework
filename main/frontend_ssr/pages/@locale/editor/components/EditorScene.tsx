@@ -92,7 +92,7 @@ export default function EditorScene({ variant }: IEditorScene) {
         {variant === 'selection' && originalModel && <primitive object={originalModel} />}
 
         {variant === 'display' && <primitive object={line} />}
-        {/* {variant === 'display' && <primitive object={faces} />} */}
+        {variant === 'display' && <primitive object={faces} />}
 
         {variant === 'selection' && <>
             <primitive object={points} onClick={handlePointClick} />

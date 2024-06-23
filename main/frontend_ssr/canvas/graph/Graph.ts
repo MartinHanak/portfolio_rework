@@ -1,4 +1,9 @@
-import { BufferGeometry, Mesh, Vector3 } from "three";
+import {
+  BufferGeometry,
+  Mesh,
+  NearestMipmapLinearFilter,
+  Vector3,
+} from "three";
 import GraphVertex from "./GraphVertex";
 import { edgeHashes, faceHashes, vectorHash } from "../utils/hash";
 import faceNormal from "../utils/faceNormal";
@@ -6,6 +11,33 @@ import Heap from "./Heap";
 
 export default class Graph {
   private graph = new Map<string, GraphVertex>();
+
+  get vertices() {
+    const iterator = this[Symbol.iterator]();
+    return {
+      [Symbol.iterator](): Iterator<GraphVertex> {
+        return iterator;
+      },
+    };
+  }
+
+  get edges() {
+    const iterator = this.getEdgesIterator();
+    return {
+      [Symbol.iterator](): Iterator<[GraphVertex, GraphVertex]> {
+        return iterator;
+      },
+    };
+  }
+
+  get faces() {
+    const iterator = this.getFacesIterator();
+    return {
+      [Symbol.iterator](): Iterator<[GraphVertex, GraphVertex, GraphVertex]> {
+        return iterator;
+      },
+    };
+  }
 
   get size() {
     return this.graph.size;
@@ -167,6 +199,29 @@ export default class Graph {
     return result;
   }
 
+  markVertices(vertices: GraphVertex[]) {
+    const result: {
+      faces: {
+        segmentWidth: number[];
+      };
+      lines: {
+        segmentWidth: number[];
+      };
+    } = {
+      faces: {
+        segmentWidth: [],
+      },
+      lines: {
+        segmentWidth: [],
+      },
+    };
+
+    for (const vertex of this) {
+    }
+
+    return result;
+  }
+
   findPath(start: GraphVertex, end: GraphVertex) {
     const path: GraphVertex[] = [];
 
@@ -305,6 +360,88 @@ export default class Graph {
     const hash = vectorHash(vec3);
 
     return this.graph.get(hash);
+  }
+
+  getFacesIterator(): Iterator<[GraphVertex, GraphVertex, GraphVertex]> {
+    const visitedFaces = new Set<string>();
+    const isUniqueFace = this.isUniqueFace.bind(this);
+
+    const vertexIterator = this[Symbol.iterator]();
+
+    let vertex: GraphVertex | undefined;
+    const vertexFaces = new Set<[GraphVertex, GraphVertex, GraphVertex]>();
+    let face: [GraphVertex, GraphVertex, GraphVertex] | undefined;
+
+    const facesIterator = vertexFaces[Symbol.iterator]();
+
+    return {
+      next() {
+        // has to cover the case when a next vertex does not add any unique face
+        while (vertexFaces.size === 0) {
+          const nextVertexIteration = vertexIterator.next();
+          if (nextVertexIteration.done) return { done: true, value: undefined };
+          vertex = nextVertexIteration.value;
+
+          for (const face of vertex.faces) {
+            if (isUniqueFace(face, visitedFaces)) vertexFaces.add(face);
+          }
+        }
+
+        const nextFaceIteration = facesIterator.next();
+
+        if (nextFaceIteration.done) return { done: true, value: undefined };
+
+        face = nextFaceIteration.value;
+        vertexFaces.delete(face);
+        return { done: false, value: face };
+      },
+    };
+  }
+
+  getEdgesIterator(): Iterator<[GraphVertex, GraphVertex]> {
+    const visitedEdges = new Set<string>();
+    const isUniqueEdge = this.isUniqueEdge.bind(this);
+
+    const vertexIterator = this[Symbol.iterator]();
+
+    let vertex: GraphVertex | undefined;
+    // save reference to current vertex neighbor
+    // reset when current vertex reset !!!
+    // only call next vertex if all current neighbor edges traversed
+    const vertexNeighbors = new Set<GraphVertex>();
+    let neighbor: GraphVertex | undefined;
+
+    const neighborsIterator = vertexNeighbors[Symbol.iterator]();
+
+    return {
+      next() {
+        if (vertexNeighbors.size === 0) {
+          const nextVertexIteration = vertexIterator.next();
+          if (nextVertexIteration.done) return { done: true, value: undefined };
+          vertex = nextVertexIteration.value;
+
+          for (const newVertexNeighbor of vertex.neighbors) {
+            if (isUniqueEdge([vertex, newVertexNeighbor], visitedEdges)) {
+              vertexNeighbors.add(newVertexNeighbor);
+            }
+          }
+
+          const nextNeighborIteration = neighborsIterator.next();
+          if (nextNeighborIteration.done)
+            return { done: true, value: undefined };
+          neighbor = nextNeighborIteration.value;
+          vertexNeighbors.delete(neighbor);
+        } else {
+          const nextNeighborIteration = neighborsIterator.next();
+          if (nextNeighborIteration.done)
+            return { done: true, value: undefined };
+          neighbor = nextNeighborIteration.value;
+          vertexNeighbors.delete(neighbor);
+        }
+
+        return { done: false, value: [vertex!, neighbor] };
+      },
+    };
   }
 
   // custom iterator = BFS graph traversal

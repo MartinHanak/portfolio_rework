@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from "vitest";
 import Graph from "../../canvas/graph/Graph";
 import { BoxGeometry } from "three";
 import GraphVertex from "../../canvas/graph/GraphVertex";
+import { lessThan } from "three/examples/jsm/nodes/Nodes.js";
+import { edgeHashes, faceHashes } from "../../canvas/utils/hash";
 
 let graph = new Graph();
 
@@ -84,5 +86,41 @@ describe("Graph", () => {
 
     console.log(path);
     expect(path.length).toBe(2);
+  });
+
+  it("traverses every edge once", () => {
+    const geometry = new BoxGeometry();
+    graph.setVertices(geometry);
+
+    const visitedEdges = new Set<string>();
+
+    for (const edge of graph.edges) {
+      const hashes = edgeHashes(edge);
+      if (hashes.some((hash) => visitedEdges.has(hash))) {
+        throw new Error("Edge visited twice");
+      } else {
+        visitedEdges.add(hashes[0]);
+      }
+    }
+
+    expect(visitedEdges.size).toBe(18);
+  });
+
+  it("traverses every face once", () => {
+    const geometry = new BoxGeometry();
+    graph.setVertices(geometry);
+
+    const visitedFaces = new Set<string>();
+
+    for (const face of graph.faces) {
+      const hashes = faceHashes(face);
+      if (hashes.some((hash) => visitedFaces.has(hash))) {
+        throw new Error("Face visited twice");
+      } else {
+        visitedFaces.add(hashes[0]);
+      }
+    }
+
+    expect(visitedFaces.size).toBe(12);
   });
 });
