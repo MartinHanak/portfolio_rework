@@ -4,7 +4,7 @@ import {
   NearestMipmapLinearFilter,
   Vector3,
 } from "three";
-import GraphVertex from "./GraphVertex";
+import GraphVertex, { FaceVertexOrder } from "./GraphVertex";
 import { edgeHashes, faceHashes, vectorHash } from "../utils/hash";
 import faceNormal from "../utils/faceNormal";
 import Heap from "./Heap";
@@ -107,7 +107,9 @@ export default class Graph {
         normals: number[];
         vertexOrder: number[];
         firstNeighbors: number[];
+        firstNeighborsTwo: number[];
         secondNeighbors: number[];
+        secondNeighborsTwo: number[];
       };
       lines: {
         positions: number[];
@@ -121,7 +123,9 @@ export default class Graph {
         normals: [],
         vertexOrder: [],
         firstNeighbors: [],
+        firstNeighborsTwo: [],
         secondNeighbors: [],
+        secondNeighborsTwo: [],
       },
       lines: {
         positions: [],
@@ -163,6 +167,28 @@ export default class Graph {
           ...face[0].position,
           ...face[1].position
         );
+
+        // common edge neighbor that share the edge position-firstNeighbor
+        const faceNeighbors = this.generateFaceNeighbors(face);
+        faceNeighbors.forEach((faceNeighbor) => {
+          result.faces.firstNeighborsTwo.push(
+            ...faceNeighbor.neighbor.position,
+            faceNeighbor.order
+          );
+        });
+
+        // common edge neighbor that share the edge secondNeighbor-position
+        const faceNeighborsTwo = this.generateFaceNeighbors([
+          face[2],
+          face[0],
+          face[1],
+        ]);
+        faceNeighborsTwo.forEach((faceNeighbor) => {
+          result.faces.secondNeighborsTwo.push(
+            ...faceNeighbor.neighbor.position,
+            faceNeighbor.order
+          );
+        });
       }
 
       // check all edges
@@ -353,6 +379,40 @@ export default class Graph {
       visitedFaces.add(hashes[0]);
       return true;
     }
+  }
+
+  private generateFaceNeighbors(face: [GraphVertex, GraphVertex, GraphVertex]) {
+    const faceNeighbors: Array<{
+      neighbor: GraphVertex;
+      order: FaceVertexOrder;
+    }> = [];
+
+    face.forEach((faceVertex, index) => {
+      const firstNeighbor = face[(index + 1) % 3];
+      const secondNeighbor = face[(index + 2) % 3];
+
+      const commonVertices = faceVertex.commonNeighborsWith(firstNeighbor);
+
+      if (commonVertices.length !== 2) {
+        throw new Error("Found 0 or too many common neighbors");
+      }
+
+      if (
+        commonVertices[0].neighbor !== secondNeighbor &&
+        commonVertices[1].neighbor !== secondNeighbor
+      ) {
+        throw new Error("Common vertices do not include the second neighbor.");
+      }
+
+      const faceNeighbor =
+        commonVertices[0].neighbor === secondNeighbor
+          ? commonVertices[0]
+          : commonVertices[1];
+
+      faceNeighbors.push(faceNeighbor);
+    });
+
+    return faceNeighbors;
   }
 
   getVertex(position: [number, number, number]) {

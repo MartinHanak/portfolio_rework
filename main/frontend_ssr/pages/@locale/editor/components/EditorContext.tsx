@@ -116,9 +116,10 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         const orderAttribute = new BufferAttribute(orderArray, 1);
         faces.geometry.setAttribute("aOrder", orderAttribute);
 
-        const normalsArray = new Float32Array(geometryData.faces.normals);
-        const normalsAttribute = new BufferAttribute(normalsArray, 3);
-        faces.geometry.setAttribute("aNormal", normalsAttribute);
+        // normals not needed when sending both triangle neighbors
+        // const normalsArray = new Float32Array(geometryData.faces.normals);
+        // const normalsAttribute = new BufferAttribute(normalsArray, 3);
+        // faces.geometry.setAttribute("aNormal", normalsAttribute);
 
         const firstNeighbors = new Float32Array(geometryData.faces.firstNeighbors);
         const firstNeighborAttribute = new BufferAttribute(firstNeighbors, 3);
@@ -127,6 +128,14 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         const secondNeighbors = new Float32Array(geometryData.faces.secondNeighbors);
         const secondNeighborAttribute = new BufferAttribute(secondNeighbors, 3);
         faces.geometry.setAttribute("aSecondNeighbor", secondNeighborAttribute);
+
+        const firstNeighborsTwo = new Float32Array(geometryData.faces.firstNeighborsTwo);
+        const firstNeighborTwoAttribute = new BufferAttribute(firstNeighborsTwo, 4);
+        faces.geometry.setAttribute("aFirstNeighborTwo", firstNeighborTwoAttribute);
+
+        const secondNeighborsTwo = new Float32Array(geometryData.faces.secondNeighborsTwo);
+        const secondNeighborTwoAttribute = new BufferAttribute(secondNeighborsTwo, 4);
+        faces.geometry.setAttribute("aSecondNeighborTwo", secondNeighborTwoAttribute);
 
         return faces;
     }, [geometryData]);
