@@ -5,6 +5,7 @@ import Graph from "../../../../canvas/graph/Graph";
 import LineSegments3 from "../../../../canvas/mesh/LineSegments3";
 import LineFacesMesh from "../../../../canvas/mesh/LineFacesMesh";
 import FaceWithEdgesMaterial from "../../../../canvas/material/FaceWithEdgesMaterial";
+import useDepthBufferScene from "../../../../canvas/hooks/useDepthBufferScene";
 
 interface IEditorContext {
     file: File | null;

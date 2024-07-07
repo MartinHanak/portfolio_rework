@@ -1,6 +1,7 @@
 uniform vec3 diffuse;
 uniform float opacity;
 uniform float linewidth;
+uniform sampler2D uDepth;
 
 flat varying float vSegmentWidth;
 flat varying vec3 vNormalFaceOne;
@@ -183,7 +184,10 @@ void main() {
     // TODO: remove
     vec4 testColor = vec4(1.0, 0.0, 0.0, 1.0);
 
-    gl_FragColor = vec4(testColor.xyz, diffuseColor.w);
+    // TODO: remove
+    vec4 samplePoint = texture2D(uDepth, vec2(0.5,0.5));
+
+    gl_FragColor = vec4(vec3(samplePoint.x), diffuseColor.w);
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>

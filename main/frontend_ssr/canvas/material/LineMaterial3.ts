@@ -17,8 +17,15 @@ export default class LineMaterial3 extends LineMaterial {
       worldUnits: true,
       // do not enable transparent: alpha parts then display background color instead
       //transparent: true,
+      // depth check is solved using a custom depth buffer logic
+      depthTest: false,
+      depthWrite: false,
       ...parameters,
     });
+    this.uniforms = {
+      ...this.uniforms,
+      uDepth: { value: null },
+    };
     this.vertexShader = LineVertex;
     this.fragmentShader = LineFragment;
   }

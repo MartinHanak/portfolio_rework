@@ -1,8 +1,9 @@
 import { OrbitControls } from '@react-three/drei';
 import { useEditorContext } from './EditorContext';
-import { useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
-import { Color, Float32BufferAttribute, Mesh, SRGBColorSpace } from 'three'; import GraphVertex from '../../../../canvas/graph/GraphVertex';
+import { Color, Float32BufferAttribute, Mesh, Scene, SRGBColorSpace } from 'three'; import GraphVertex from '../../../../canvas/graph/GraphVertex';
+import useDepthBufferScene from '../../../../canvas/hooks/useDepthBufferScene';
 
 interface IEditorScene {
     variant: 'selection' | 'display';
@@ -14,6 +15,20 @@ export default function EditorScene({ variant }: IEditorScene) {
     const { file, cameraMatrix, cameraMatrixChange, originalModel, line, faces, graph, points } = useEditorContext();
 
     const selectedVertices = useRef<GraphVertex[]>([]);
+
+    const depthScene = useMemo(() => {
+        const scene = new Scene();
+        scene.add(faces);
+        return scene;
+    }, [faces]);
+
+    const depthBuffer = useDepthBufferScene({ disable: (variant === 'selection'), depthScene: depthScene });
+
+    useEffect(() => {
+        console.log('Depth buffer or line changed');
+        line.material.uniforms.uDepth.value = depthBuffer;
+    }, [depthBuffer, line]);
+
 
     useFrame(() => {
         if (variant === 'selection') {
@@ -92,7 +107,7 @@ export default function EditorScene({ variant }: IEditorScene) {
         {variant === 'selection' && originalModel && <primitive object={originalModel} />}
 
         {variant === 'display' && <primitive object={line} />}
-        {variant === 'display' && <primitive object={faces} />}
+        {/* {variant === 'display' && <primitive object={faces} />} */}
 
         {variant === 'selection' && <>
             <primitive object={points} onClick={handlePointClick} />
