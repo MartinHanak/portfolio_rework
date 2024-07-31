@@ -16,18 +16,18 @@ export default function EditorScene({ variant }: IEditorScene) {
 
     const selectedVertices = useRef<GraphVertex[]>([]);
 
-    const depthScene = useMemo(() => {
-        const scene = new Scene();
-        scene.add(faces);
-        return scene;
-    }, [faces]);
+    // const depthScene = useMemo(() => {
+    //     const scene = new Scene();
+    //     scene.add(faces);
+    //     return scene;
+    // }, [faces]);
 
-    const depthBuffer = useDepthBufferScene({ disable: (variant === 'selection'), depthScene: depthScene });
+    // const depthBuffer = useDepthBufferScene({ disable: (variant === 'selection'), depthScene: depthScene });
 
-    useEffect(() => {
-        console.log('Depth buffer or line changed');
-        line.material.uniforms.uDepth.value = depthBuffer;
-    }, [depthBuffer, line]);
+    // useEffect(() => {
+    //     console.log('Depth buffer or line changed');
+    //     line.material.uniforms.uDepth.value = depthBuffer;
+    // }, [depthBuffer, line]);
 
 
     useFrame(() => {
@@ -106,8 +106,8 @@ export default function EditorScene({ variant }: IEditorScene) {
 
         {variant === 'selection' && originalModel && <primitive object={originalModel} />}
 
+        {variant === 'display' && <primitive object={faces} />}
         {variant === 'display' && <primitive object={line} />}
-        {/* {variant === 'display' && <primitive object={faces} />} */}
 
         {variant === 'selection' && <>
             <primitive object={points} onClick={handlePointClick} />

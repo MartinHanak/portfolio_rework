@@ -18,7 +18,7 @@ export default class LineMaterial3 extends LineMaterial {
       // do not enable transparent: alpha parts then display background color instead
       //transparent: true,
       // depth check is solved using a custom depth buffer logic
-      depthTest: false,
+      // depthTest: false,
       depthWrite: false,
       ...parameters,
     });

@@ -100,6 +100,8 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         const neighborTwoAttribute = new InstancedBufferAttribute(neighborTwoArray, 4);
         line.geometry.setAttribute('neighborTwo', neighborTwoAttribute);
 
+        line.renderOrder = 2;
+
         return line;
     }, [geometryData]);
 
@@ -137,6 +139,8 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         const secondNeighborsTwo = new Float32Array(geometryData.faces.secondNeighborsTwo);
         const secondNeighborTwoAttribute = new BufferAttribute(secondNeighborsTwo, 4);
         faces.geometry.setAttribute("aSecondNeighborTwo", secondNeighborTwoAttribute);
+
+        faces.renderOrder = 1;
 
         return faces;
     }, [geometryData]);
