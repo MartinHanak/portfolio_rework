@@ -1,9 +1,11 @@
-import { ChangeEvent, useEffect, useRef } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useEditorContext } from "./EditorContext";
 
 export default function EditorControls() {
 
-    const { file, setFile } = useEditorContext();
+    const [angle, setAngle] = useState(90);
+
+    const { file, setFile, markEdgesAngle } = useEditorContext();
     const controls = useRef<HTMLDivElement>(null);
     const startOffset = useRef<{ top: number, left: number; } | null>(null);
 
@@ -45,9 +47,22 @@ export default function EditorControls() {
 
     return <div ref={controls} className="absolute top-32 left-4 px-4 pb-4 rounded-md bg-gray-900 bg-opacity-50 text-white z-[9999]">
         <button className="ml-auto block" onPointerDown={handleDown}>move</button>
-        <div className="flex flex-col">
-            <label htmlFor="gltf-input">Load gltf</label>
-            <input type="file" name="gltf-input" id="gltf-input" onChange={handleFileChange} />
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-col">
+                <label htmlFor="gltf-input">Load gltf</label>
+                <input type="file" name="gltf-input" id="gltf-input" onChange={handleFileChange} />
+            </div>
+
+            <div className="flex flex-col">
+                <label htmlFor="angle">Mark edges with angle greater than or equal to</label>
+                <input id="angle" type="number" className="text-black"
+                    value={angle}
+                    onChange={(e) => setAngle(Number(e.target.value))}
+                    min={0}
+                    max={180}
+                ></input>
+                <button onClick={() => markEdgesAngle(angle)}>Mark</button>
+            </div>
         </div>
     </div>;
 }

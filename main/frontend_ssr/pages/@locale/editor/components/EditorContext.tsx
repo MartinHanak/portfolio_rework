@@ -1,4 +1,4 @@
-import { MutableRefObject, ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { MutableRefObject, ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { BufferAttribute, Camera, Float32BufferAttribute, InstancedBufferAttribute, Matrix4, Mesh, Object3D, Points, PointsMaterial } from "three";
 import { GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
 import Graph from "../../../../canvas/graph/Graph";
@@ -6,6 +6,7 @@ import LineSegments3 from "../../../../canvas/mesh/LineSegments3";
 import LineFacesMesh from "../../../../canvas/mesh/LineFacesMesh";
 import FaceWithEdgesMaterial from "../../../../canvas/material/FaceWithEdgesMaterial";
 import useDepthBufferScene from "../../../../canvas/hooks/useDepthBufferScene";
+import faceNormal from "../../../../canvas/utils/faceNormal";
 
 interface IEditorContext {
     file: File | null;
@@ -17,13 +18,14 @@ interface IEditorContext {
     line: LineSegments3;
     faces: LineFacesMesh;
     points: Points;
+    markEdgesAngle: (angle: number) => void;
 }
 
 interface IEditorContextProvider {
     children: ReactNode;
 }
 
-const editorContext = createContext<IEditorContext>({ file: null, setFile: () => { }, cameraMatrix: { current: new Camera() }, cameraMatrixChange: () => { }, originalModel: null, graph: new Graph(), line: new LineSegments3(), faces: new LineFacesMesh(), points: new Points() });
+const editorContext = createContext<IEditorContext>({ file: null, setFile: () => { }, cameraMatrix: { current: new Camera() }, cameraMatrixChange: () => { }, originalModel: null, graph: new Graph(), line: new LineSegments3(), faces: new LineFacesMesh(), points: new Points(), markEdgesAngle: () => { } });
 
 export default function EditorContext({ children }: IEditorContextProvider) {
     // input file
@@ -32,6 +34,7 @@ export default function EditorContext({ children }: IEditorContextProvider) {
     const handleFileChange = (inputFile: File | null) => {
         setFile(inputFile);
     };
+
 
     // camera
     const cameraMatrixRef = useRef<Camera>(new Camera());
@@ -156,6 +159,39 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         return pointsMesh;
     }, [graph]);
 
+    // mark angle in the geometry
+    // takes angle in degrees
+    const markEdgeAngle = useCallback((thresholdAngle: number) => {
+
+        const segmentWidthAttribute = lineMesh.geometry.getAttribute('segmentWidth');
+        const array = segmentWidthAttribute.array;
+
+        let index = 0;
+        for (const edge of graph.edges) {
+            const [start, end] = edge;
+            const commonFaces = start.commonFacesWith(end);
+
+            if (commonFaces.length !== 2) {
+                throw new Error('Vertices do not have 2 common faces');
+            }
+
+            const normalOne = faceNormal(commonFaces[0]);
+            const normalTwo = faceNormal(commonFaces[1]);
+
+            const dotProduct = normalOne.dot(normalTwo);
+            // angle from 0 to 180 degrees
+            const normalAngle = Math.acos(dotProduct) * 180 / Math.PI;
+
+            if (normalAngle >= thresholdAngle) {
+                array[index] = 1.0;
+            }
+
+            index += 1;
+        }
+
+        segmentWidthAttribute.needsUpdate = true;
+    }, [graph, lineMesh]);
+
     return <editorContext.Provider value={{
         file: file,
         setFile: handleFileChange,
@@ -165,7 +201,8 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         graph: graph,
         line: lineMesh,
         faces: facesMesh,
-        points: points
+        points: points,
+        markEdgesAngle: markEdgeAngle
     }}>
         {children}
     </editorContext.Provider>;

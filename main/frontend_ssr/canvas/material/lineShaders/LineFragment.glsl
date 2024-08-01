@@ -77,9 +77,11 @@ void main() {
     float dotProdOne = dot(cameraDirection, vNormalFaceOne);
     float dotProdTwo = dot(cameraDirection, vNormalFaceTwo);
 
-    if(dotProdOne * dotProdTwo  < 0.0) {
+    if(dotProdOne * dotProdTwo  < 0.0 || vSegmentWidth > 0.01) {
         // check direction of normal vectors
         // if one back and and forward = edge
+        // OR
+        // segmentWidth defined = always display the line
 
     } else if(dotProdOne < 0.0 && dotProdTwo < 0.0) {
         // both faces back to the camera = do not render 
