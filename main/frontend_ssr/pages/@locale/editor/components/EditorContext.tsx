@@ -155,7 +155,26 @@ export default function EditorContext({ children }: IEditorContextProvider) {
         const material = new PointsMaterial({ vertexColors: true });
         pointsMesh.material = material;
 
-        pointsMesh.geometry.setAttribute('position', new Float32BufferAttribute(graph.pointPositionsBuffer, 3));
+        // make sure that order of points mesh is the same as the order of the Graph
+        const positionArray: number[] = [];
+        for (const vertex of graph.vertices) {
+            positionArray.push(...vertex.position);
+        }
+
+        const typedPositionArray = new Float32Array(positionArray);
+        const positionAttribute = new BufferAttribute(typedPositionArray, 3);
+
+        pointsMesh.geometry.setAttribute('position', positionAttribute);
+
+        // colors
+        const colors: number[] = [];
+        for (const vertex of graph.vertices) {
+            colors.push(0, 0, 0);
+        }
+        const typedColors = new Float32Array(colors);
+        const colorAttribute = new BufferAttribute(typedColors, 3);
+        pointsMesh.geometry.setAttribute('color', colorAttribute);
+
         return pointsMesh;
     }, [graph]);
 

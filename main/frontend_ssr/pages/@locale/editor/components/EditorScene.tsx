@@ -1,9 +1,8 @@
 import { OrbitControls } from '@react-three/drei';
 import { useEditorContext } from './EditorContext';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
-import { Color, Float32BufferAttribute, Mesh, Scene, SRGBColorSpace } from 'three'; import GraphVertex from '../../../../canvas/graph/GraphVertex';
-import useDepthBufferScene from '../../../../canvas/hooks/useDepthBufferScene';
+import { Color, Float32BufferAttribute, SRGBColorSpace } from 'three'; import GraphVertex from '../../../../canvas/graph/GraphVertex';
 
 interface IEditorScene {
     variant: 'selection' | 'display';
@@ -14,7 +13,75 @@ export default function EditorScene({ variant }: IEditorScene) {
 
     const { file, cameraMatrix, cameraMatrixChange, originalModel, line, faces, graph, points } = useEditorContext();
 
-    const selectedVertices = useRef<GraphVertex[]>([]);
+    const [selectedVertices, setSelectedVertices] = useState<Array<GraphVertex>>([]);
+
+    const userSelectedVerticesSet = useMemo(() => {
+        const set = new Set<GraphVertex>();
+
+        for (const vertex of selectedVertices) {
+            set.add(vertex);
+        }
+
+        return set;
+    }, [selectedVertices]);
+
+    // find path of connected vertices between the user selected ones
+    const verticesPath = useMemo(() => {
+        const path: GraphVertex[] = [];
+
+        for (const vertex of selectedVertices) {
+            if (path.length === 0) {
+                path.push(vertex);
+            } else {
+                const previousVertex = path[path.length - 1];
+                const pathBetweenVertices = graph.findPath(previousVertex, vertex);
+
+                for (const vertex of pathBetweenVertices) {
+                    path.push(vertex);
+                }
+            }
+        }
+
+        return path;
+    }, [selectedVertices]);
+
+    const verticesPathSet = useMemo(() => {
+        const pathSet = new Set<GraphVertex>();
+
+        for (const vertex of verticesPath) {
+            pathSet.add(vertex);
+        }
+        return pathSet;
+    }, [verticesPath]);
+
+    // update points colors when selected vertices change
+    useEffect(() => {
+        const colorAttribute = points.geometry.getAttribute('color');
+        if (!colorAttribute) return;
+
+        const colorAttributeArray = colorAttribute.array;
+
+        const color = new Color();
+
+        let arrayIndex = 0;
+        for (const vertex of graph.vertices) {
+
+            if (verticesPathSet.has(vertex)) {
+                color.setRGB(1, 0, 0, SRGBColorSpace);
+            } else {
+                color.setRGB(0, 0, 1, SRGBColorSpace);
+            }
+
+            colorAttributeArray[arrayIndex] = color.r;
+            colorAttributeArray[arrayIndex + 1] = color.g;
+            colorAttributeArray[arrayIndex + 2] = color.b;
+
+            arrayIndex += 3;
+        }
+
+        colorAttribute.needsUpdate = true;
+
+    }, [verticesPath]);
 
     // const depthScene = useMemo(() => {
     //     const scene = new Scene();
@@ -54,37 +121,16 @@ export default function EditorScene({ variant }: IEditorScene) {
         const vertex = graph.getVertex(position);
         if (!vertex) return;
 
+        console.log(`Clicked vertex `, vertex);
 
-        if (e.shiftKey && selectedVertices.current.length > 0) {
-
-            const previouslySelectedVertex = selectedVertices.current[selectedVertices.current.length - 1];
-
-            console.log(graph.findPath(previouslySelectedVertex, vertex));
-
-            // add points to selection = find shortest path (maybe biased by the angle ???) in the graph
-
-            // points between = graph.findPath(start, end);
-
+        if (e.shiftKey) {
+            setSelectedVertices((prev) => {
+                return [...prev, vertex];
+            });
         } else {
-            // select one new point, reset previous selection
-
-            selectedVertices.current = [vertex];
-
-            const colors: number[] = [];
-            const color = new Color();
-
-            for (let i = 0; i < graph.size; i++) {
-
-                if (i === e.index) {
-                    color.setRGB(1, 0, 0, SRGBColorSpace);
-                } else {
-                    color.setRGB(0, 0, 1, SRGBColorSpace);
-                }
-
-                colors.push(color.r, color.g, color.b);
-            }
-
-            points.geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+            setSelectedVertices(() => {
+                return [vertex];
+            });
         }
     };
 
