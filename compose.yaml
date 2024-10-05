@@ -40,6 +40,9 @@ services:
       - type: bind
         source: ./main/backend/API
         target: /app
+      - type: bind
+        source: ./static/videos
+        target: /app/static/videos
         # 2 anonymous volumes, so that they are not included in bind mount
       - /app/bin
       - /app/obj
