@@ -1,10 +1,22 @@
 using API;
 using Microsoft.EntityFrameworkCore;
 
+var AllowAllOrigins = "_origins";
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// CORS setup
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: AllowAllOrigins, builder =>
+        builder.
+        AllowAnyOrigin().
+        AllowAnyHeader().
+        AllowAnyMethod()
+    );
+});
 
 // Database setup
 builder.Services.AddDbContext<APIDbContext>(options =>
@@ -26,6 +38,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(AllowAllOrigins);
 
 app.UseAuthorization();
 
